@@ -59,11 +59,14 @@ class TorchModel(nn.Module):
 
     # 当输入真实标签，返回loss值；无真实标签，返回预测值
     def forward(self, x, target=None):
+        # x int64，这里的x中的每一个元素表示，一个字符对应在词表中的序号 bs*len
+        # 之后经过embedding层，将其转变为float类型的词嵌入，增加一个维度，再消去sen_len维度，这样才能送入线性层
+        # （线性层的权重和偏置定义为浮点数类型，因为这可以更好地处理连续值的情况，不能直接使用int类型）
         if self.use_bert:  # bert返回的结果是 (sequence_output, pooler_output)
             x = self.encoder(x)
         else:
-            x = self.embedding(x)  # input shape:(batch_size, sen_len)
-            x = self.encoder(x)  # input shape:(batch_size, sen_len, input_dim)
+            x = self.embedding(x)  # embedding(vocab_size,hs) 输入x:(batch_size, sen_len) 输出x(bs,sen_len,hs),增加hs维度
+            x = self.encoder(x)  # input shape:(batch_size, sen_len, input_dim) encoder(hs,hs) 输出 （hs,hs）
         if self.use_bert:  # 这里bert要获取last_hidden_state
             x = x.last_hidden_state
         if isinstance(x, tuple):  # RNN类的模型会同时返回隐单元向量，我们只取序列结果

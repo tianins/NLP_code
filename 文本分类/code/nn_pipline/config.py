@@ -12,7 +12,7 @@ Config = {
     "train_data_path": "../data/Sentiment_classification_data_processing/new_train_data.json",
     "valid_data_path": "../data/Sentiment_classification_data_processing/test_data.json",
     "vocab_path": "chars.txt",
-    "model_type": "bert",
+    "model_type": "rnn",
     "max_length": 20,
     "hidden_size": 128,
     "kernel_size": 3,

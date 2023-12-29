@@ -1,0 +1,4 @@
+2023-12-29 12:19:19,531 [INFO] - bs个数：399
+2023-12-29 12:19:19,551 [INFO] - {'log_file': 'log_file', 'class_num': 2, 'model_path': 'output', 'train_data_path': '../data/Sentiment_classification_data_processing/new_train_data.json', 'valid_data_path': '../data/Sentiment_classification_data_processing/test_data.json', 'vocab_path': 'chars.txt', 'model_type': 'rnn', 'max_length': 20, 'hidden_size': 128, 'kernel_size': 3, 'num_layers': 2, 'epoch': 5, 'batch_size': 16, 'pooling_style': 'max', 'optimizer': 'adam', 'learning_rate': 1e-05, 'pretrain_model_path': 'E:\\data\\hub\\bert_base_chinese', 'seed': 987, 'vocab_size': 4622}
+2023-12-29 12:19:19,552 [INFO] - gpu可以使用，迁移模型至gpu
+2023-12-29 12:19:21,602 [INFO] - epoch 1 begin
