@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 规律：x是一个5维向量，如果第1个数>第5个数，则为正样本，反之为负样本
 
 修改为多分类
+随机生成一个5维向量，如果第一个值大于第五个值，认为是0样本，如果第二个值大于第四个值视为1样本，其他视为2样本
 采用交叉熵损失函数
 """
 
@@ -22,7 +23,7 @@ class TorchModel(nn.Module):
     def __init__(self, input_size):
         super(TorchModel, self).__init__()
         # self.linear = nn.Linear(input_size, 1)  # 线性层
-        self.fc = nn.Linear(input_size, input_size*64)
+        self.fc = nn.Linear(input_size, input_size*64)  # 全连接层
         self.linear = nn.Linear(input_size*64, 3)  # 修改为分类数量
         self.activation = torch.sigmoid  # sigmoid归一化函数
         # self.loss = nn.functional.mse_loss  # loss函数采用均方差损
@@ -167,8 +168,4 @@ def predict(model_path, input_vec):
 
 if __name__ == "__main__":
     main()
-    # test_vec = [[0.47889086, 0.15229675, 0.31082123, 0.03504317, 0.18920843],
-    #             [0.94963533, 0.5524256, 0.95758807, 0.95520434, 0.84890681],
-    #             [0.78797868, 0.67482528, 0.13625847, 0.34675372, 0.09871392],
-    #             [0.89349776, 0.59416669, 0.92579291, 0.41567412, 0.7358894]]
-    # predict("model.pth", test_vec)
+
