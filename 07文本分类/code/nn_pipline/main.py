@@ -9,7 +9,7 @@ import logging
 from config import Config
 from model import TorchModel, choose_optimizer
 from evaluate import Evaluator
-from loader_1226 import load_data
+from loader_wm import load_data
 import time
 import os
 time_str = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
