@@ -36,11 +36,17 @@ class LanguageModel(nn.Module):
     #当输入真实标签，返回loss值；无真实标签，返回预测值
     def forward(self, x, y=None):
         if self.config["use_bert"]:
-            x, _ = self.bert_encoder(x)
+            # 训练时，构建一个下三角的mask矩阵，让上下文之间没有交互
+            mask = torch.tril(torch.ones((x.shape[0], x.shape[1], x.shape[1])))
+            if torch.cuda.is_available():
+                mask = mask.cuda()
+            x, _ = self.bert_encoder(x, attention_mask=mask)
+
+            # x, _ = self.bert_encoder(x)
         else:
             x = self.embedding(x)       #output shape:(batch_size, sen_len, input_dim)
             x, _ = self.layer(x)        #output shape:(batch_size, sen_len, input_dim)
-        y_pred = self.classify(x)   #output shape:(batch_size, vocab_size)
+        y_pred = self.classify(x)       #output shape:(batch_size, vocab_size)
         if y is not None:
             return self.loss(y_pred.view(-1, y_pred.shape[-1]), y.view(-1))
         else:
@@ -51,7 +57,7 @@ def build_vocab(config):
     if config['use_bert']:
         vocab = BertTokenizer(config['vocab_path'])
     else:
-        vocab_path = "E:\\data\\hub\\bert_base_chinese\\vocab.txt"
+        vocab_path = config['vocab_path']
         vocab = {"<pad>":0}
         with open(vocab_path, encoding="utf8") as f:
             for index, line in enumerate(f):
@@ -78,16 +84,20 @@ def build_sample(vocab, window_size, corpus,config):
 
     if config["use_bert"]:
         
-        x = vocab.encode(window,
-                            truncation='longest_first',
-                            max_length=window_size,
-                            padding='max_length',
-                            )
-        y = vocab.encode(target,
-                            truncation='longest_first',
-                            max_length=window_size,
-                            padding='max_length',
-                            )
+        # x = vocab.encode(window,
+        #                     truncation='longest_first',
+        #                     max_length=window_size,
+        #                     padding='max_length',
+        #                     )
+        # y = vocab.encode(target,
+        #                     truncation='longest_first',
+        #                     max_length=window_size,
+        #                     padding='max_length',
+        #                     )
+
+        x = vocab.encode(window, add_special_tokens=False, padding='max_length', truncation=True,
+                             max_length=window_size)  # 将字转换成序号
+        y = vocab.encode(target, add_special_tokens=False, padding='max_length', truncation=True, max_length=window_size)
     else:
         x = [vocab.get(word, vocab["[UNK]"]) for word in window]   #将字转换成序号
         y = [vocab.get(word, vocab["[UNK]"]) for word in target]
@@ -127,11 +137,12 @@ def generate_sentence(openings, model, vocab, window_size,config):
             if not config['use_bert']:
                 x = [vocab.get(char, vocab["[UNK]"]) for char in openings[-window_size:]]
             else:
-                x = vocab.encode(openings[-window_size:],
-                    truncation='longest_first',
-                    max_length=window_size,
-                    padding='max_length',
-                    )
+                # x = vocab.encode(openings[-window_size:],
+                #     truncation='longest_first',
+                #     max_length=window_size,
+                #     padding='max_length',
+                #     )
+                x = vocab.encode(openings, add_special_tokens=False)
             x = torch.LongTensor([x])
             if torch.cuda.is_available():
                 x = x.cuda()
@@ -140,11 +151,12 @@ def generate_sentence(openings, model, vocab, window_size,config):
             if not config['use_bert']:
                 pred_char = reverse_vocab[index]
             else:
-                pred_char = vocab.convert_ids_to_tokens([index])[0]
+                # pred_char = vocab.convert_ids_to_tokens([index])[0]
+                pred_char = ''.join(vocab.decode([index])[0])
     return openings
 
 def sampling_strategy(prob_distribution):
-    if random.random() > 0.5:
+    if random.random() > 0.1:
         strategy = "greedy"
     else:
         strategy = "sampling"
@@ -176,7 +188,7 @@ def calc_perplexity(sentence, model, vocab, window_size):
 
 
 def train(corpus_path, save_weight=True, config=None):
-    epoch_num = 20        #训练轮数
+    epoch_num = 100        #训练轮数
     batch_size = 64       #每次训练样本个数
     train_sample = 50000   #每轮训练总共训练的样本总数
     char_dim = 256        #每个字的维度
