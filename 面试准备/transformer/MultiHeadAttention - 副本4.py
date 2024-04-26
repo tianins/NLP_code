@@ -93,107 +93,108 @@ plt.rcParams['axes.unicode_minus'] = False  # 用于正常显示负号
 
 
 # 4.4
-# # 数据
-# categories = ['0', '1-2', '3-5', '6-10', '10+']
-# SER = [66.7, 61.9, 72.3, 76.6, 85.9]
-# SER_DA = [88.4, 85.1, 86.4, 81.0, 72.8]
-# SER_DA_plus = [86.6, 80.9, 84.7, 83.6, 83.9]
-# SER_DA_plus_L = [86.0, 80.4, 85.6, 81.6, 85.5]
-
-# # 设置图形大小
-# plt.figure(figsize=(10, 8))
-
-# # 设置标题和坐标轴标签
-# # plt.title('Performance Comparison', fontsize=16)
-# plt.xlabel('样本出现概率', fontsize=14)
-# plt.ylabel('F1-Score', fontsize=14)
-
-# # 设置x轴刻度
-# x = np.arange(len(categories))
-# plt.xticks(x, categories)
-
-# # 设置柱形图的宽度
-# bar_width = 0.2
-
-# # 定义配色
-# colors = ['#fc8d62', '#ffd92f', '#e5c494', '#b3b3b3']
-
-# # 绘制柱状图
-# plt.bar(x - bar_width, SER, width=bar_width, label='SER', color=colors[0])
-# for i, v in enumerate(SER):
-#     plt.text(x[i] - bar_width, v, str(round(v, 1)), ha='center', va='bottom', fontsize=10)
-
-# plt.bar(x, SER_DA, width=bar_width, label='SER-DA', color=colors[1])
-# for i, v in enumerate(SER_DA):
-#     plt.text(x[i], v, str(round(v, 1)), ha='center', va='bottom', fontsize=10)
-
-# plt.bar(x + bar_width, SER_DA_plus, width=bar_width, label='SER-DA+', color=colors[2])
-# for i, v in enumerate(SER_DA_plus):
-#     plt.text(x[i] + bar_width, v, str(round(v, 1)), ha='center', va='bottom', fontsize=10)
-
-# plt.bar(x + 2 * bar_width, SER_DA_plus_L, width=bar_width, label='SER-L-DA+', color=colors[3])
-# for i, v in enumerate(SER_DA_plus_L):
-#     plt.text(x[i] + 2 * bar_width, v, str(round(v, 1)), ha='center', va='bottom', fontsize=10)
-
-# # 添加图例
-# plt.legend(fontsize=12)
-
-# # 设置y轴范围
-# plt.ylim(60, 100)
-
-# # 显示网格线
-# plt.grid(axis='y', linestyle='--', alpha=0.5)
-
-# # 调整子图之间的间距
-# plt.subplots_adjust(left=0.1, right=0.95, bottom=0.15, top=0.9)
-
-# # 显示图形
-# plt.show()
-
-
 # 数据
-categories = ['0.0-0.1', '0.1-0.2', '0.2-0.3', '0.3-0.4', '0.4-0.5', '0.5-0.6', '0.6-0.7', '0.7-0.8', '0.8-0.9', '0.9-1.0']
-KLS = [0, 0, 0, 0, 1.35, 18.51, 41.17, 28.80, 9.17, 0.96]
-WN = [0, 0, 0, 0, 0.13, 3.41, 24.71, 44.96, 23.60, 3.02]
-FEWS = [0, 0, 0, 0, 0.10, 4.76, 30.01, 44.90, 18.82, 1.41]
+categories = ['0(16.3%)', '1-2(11.5%)', '3-5(9.8%)', '6-10(11.1%)', '10+(51.3%)']
+SER = [66.7, 61.9, 72.3, 76.6, 85.9]
+SER_DA = [88.4, 85.1, 86.4, 81.0, 72.8]
+SER_DA_plus = [86.6, 80.9, 84.7, 83.6, 83.9]
+SER_DA_plus_L = [86.0, 80.4, 85.6, 81.6, 85.5]
 
 # 设置图形大小
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(10, 8))
 
 # 设置标题和坐标轴标签
-# plt.title('Distribution Comparison', fontsize=16)
-plt.xlabel('相似度范围', fontsize=14)
-plt.ylabel('占比', fontsize=14)
+# plt.title('Performance Comparison', fontsize=16)
+plt.xlabel('词义标签在训练集出现次数', fontsize=14)
+plt.ylabel('F1-Score', fontsize=14)
+
 
 # 设置x轴刻度
 x = np.arange(len(categories))
-plt.xticks(x, categories, rotation=45)
+plt.xticks(x, categories)
 
 # 设置柱形图的宽度
-bar_width = 0.25
+bar_width = 0.2
 
 # 定义配色
-colors = ['#7f7f7f', '#bcbd22', '#17becf']
+colors = ['#fc8d62', '#ffd92f', '#e5c494', '#b3b3b3']
 
 # 绘制柱状图
-plt.bar(x - bar_width, KLS, width=bar_width, label='KLS', color=colors[0])
-plt.bar(x, WN, width=bar_width, label='WN', color=colors[1])
-plt.bar(x + bar_width, FEWS, width=bar_width, label='FEWS', color=colors[2])
+plt.bar(x - bar_width, SER, width=bar_width, label='SER', color=colors[0])
+for i, v in enumerate(SER):
+    plt.text(x[i] - bar_width, v, str(round(v, 1)), ha='center', va='bottom', fontsize=10)
+
+plt.bar(x, SER_DA, width=bar_width, label='SER-DA', color=colors[1])
+for i, v in enumerate(SER_DA):
+    plt.text(x[i], v, str(round(v, 1)), ha='center', va='bottom', fontsize=10)
+
+plt.bar(x + bar_width, SER_DA_plus, width=bar_width, label='SER-DA+', color=colors[2])
+for i, v in enumerate(SER_DA_plus):
+    plt.text(x[i] + bar_width, v, str(round(v, 1)), ha='center', va='bottom', fontsize=10)
+
+plt.bar(x + 2 * bar_width, SER_DA_plus_L, width=bar_width, label='SER-L-DA+', color=colors[3])
+for i, v in enumerate(SER_DA_plus_L):
+    plt.text(x[i] + 2 * bar_width, v, str(round(v, 1)), ha='center', va='bottom', fontsize=10)
 
 # 添加图例
 plt.legend(fontsize=12)
 
 # 设置y轴范围
-plt.ylim(0, 100)
+plt.ylim(60, 100)
 
 # 显示网格线
 plt.grid(axis='y', linestyle='--', alpha=0.5)
 
 # 调整子图之间的间距
-plt.subplots_adjust(left=0.1, right=0.95, bottom=0.2, top=0.9)
+plt.subplots_adjust(left=0.1, right=0.95, bottom=0.15, top=0.9)
 
 # 显示图形
 plt.show()
+
+
+# 数据
+# categories = ['0.0-0.1', '0.1-0.2', '0.2-0.3', '0.3-0.4', '0.4-0.5', '0.5-0.6', '0.6-0.7', '0.7-0.8', '0.8-0.9', '0.9-1.0']
+# KLS = [0, 0, 0, 0, 1.35, 18.51, 41.17, 28.80, 9.17, 0.96]
+# WN = [0, 0, 0, 0, 0.13, 3.41, 24.71, 44.96, 23.60, 3.02]
+# FEWS = [0, 0, 0, 0, 0.10, 4.76, 30.01, 44.90, 18.82, 1.41]
+
+# # 设置图形大小
+# plt.figure(figsize=(8, 6))
+
+# # 设置标题和坐标轴标签
+# # plt.title('Distribution Comparison', fontsize=16)
+# plt.xlabel('相似度范围', fontsize=14)
+# plt.ylabel('占比', fontsize=14)
+
+# # 设置x轴刻度
+# x = np.arange(len(categories))
+# plt.xticks(x, categories, rotation=45)
+
+# # 设置柱形图的宽度
+# bar_width = 0.25
+
+# # 定义配色
+# colors = ['#7f7f7f', '#bcbd22', '#17becf']
+
+# # 绘制柱状图
+# plt.bar(x - bar_width, KLS, width=bar_width, label='KLS', color=colors[0])
+# plt.bar(x, WN, width=bar_width, label='WN', color=colors[1])
+# plt.bar(x + bar_width, FEWS, width=bar_width, label='FEWS', color=colors[2])
+
+# # 添加图例
+# plt.legend(fontsize=12)
+
+# # 设置y轴范围
+# plt.ylim(0, 100)
+
+# # 显示网格线
+# plt.grid(axis='y', linestyle='--', alpha=0.5)
+
+# # 调整子图之间的间距
+# plt.subplots_adjust(left=0.1, right=0.95, bottom=0.2, top=0.9)
+
+# # 显示图形
+# plt.show()
 
 
 
