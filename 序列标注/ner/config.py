@@ -5,9 +5,11 @@
 """
 
 Config = {
+    "use_peft":True,
+    "tuning_tactics":"lora_tuning", # lora_tuning
     "bert_requires_grad": False,
     "path_log_loss":"model_output/loss_file/bert",
-    "use_bert": False,
+    "use_bert": True,
     "pretrain_model_path": r"E:\data\hub\bert_base_chinese",
     "vocab_path": r"E:\data\hub\bert_base_chinese\vocab.txt",
     "model_path": "model_output",

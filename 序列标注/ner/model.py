@@ -5,6 +5,11 @@ import torch.nn as nn
 from torch.optim import Adam, SGD
 from torchcrf import CRF
 from transformers import BertModel, BertConfig
+from transformers import AutoTokenizer, AutoModel,AutoModelForTokenClassification
+from peft import get_peft_model, LoraConfig, TaskType, \
+    PromptTuningConfig, PrefixTuningConfig, PromptEncoderConfig 
+from torch.optim import Adam, SGD
+
 """
 建立网络模型结构，增加bert模型
 """
@@ -17,7 +22,43 @@ class TorchModel(nn.Module):
         vocab_size = config["vocab_size"] + 1
         class_num = config["class_num"]
         pretrain_model_path = config["pretrain_model_path"]
-        self.bert_encoder = BertModel.from_pretrained(pretrain_model_path)
+        if config['use_bert']:
+            if config['use_peft']:
+                model = AutoModelForTokenClassification.from_pretrained(config["pretrain_model_path"], num_labels=class_num)
+                # model = BertModel.from_pretrained(pretrain_model_path) 
+                # model = AutoModel.from_pretrained(pretrain_model_path) 
+                #大模型微调策略
+                tuning_tactics = config["tuning_tactics"]
+                if tuning_tactics == "lora_tuning":
+                    # peft_config = LoraConfig(
+                    #     task_type=TaskType.SEQ_CLS,
+                    #     inference_mode=False,
+                    #     r=16,
+                    #     lora_alpha=32,
+                    #     lora_dropout=0.05,
+                    #     target_modules=["query", "key", "value"]
+                    # )
+                    peft_config = LoraConfig(
+                        r=8,
+                        lora_alpha=32,
+                        inference_mode=False,
+                        target_modules=["query", "key", "value"],
+                        lora_dropout=0.05,
+                        bias="none",
+                        task_type=TaskType.TOKEN_CLS
+                    )
+                elif tuning_tactics == "p_tuning":
+                    peft_config = PromptEncoderConfig(task_type="SEQ_CLS", num_virtual_tokens=10)
+                elif tuning_tactics == "prompt_tuning":
+                    peft_config = PromptTuningConfig(task_type="SEQ_CLS", num_virtual_tokens=10)
+                elif tuning_tactics == "prefix_tuning":
+                    peft_config = PrefixTuningConfig(task_type="SEQ_CLS", num_virtual_tokens=10)
+                
+                # print(model.state_dict().keys())
+                self.bert_encoder = get_peft_model(model, peft_config)
+                # self.bert_encoder = model
+            else:
+                self.bert_encoder = BertModel.from_pretrained(pretrain_model_path) 
         # 冻结BERT模型参数
         # if not self.config['bert_requires_grad']:
         #     for param in self.bert_encoder.parameters():
@@ -40,6 +81,19 @@ class TorchModel(nn.Module):
 
     #当输入真实标签，返回loss值；无真实标签，返回预测值
     def forward(self, x, target=None):
+        if self.config["use_peft"]:
+            predict = self.bert_encoder(x)[0] 
+            # predict 32,60,9 ? 60是什么啊 x 32,50
+            # 之后排查了一下，可能是num_virtual_tokens=10，增加了10个虚拟的文本长度
+            # 可是这样子增加文本长度后，应该要怎么预测？因为是基于每个token进行预测的，前面填充的token没有标签，这要如何预测？
+            # 所以对于序列标注任务不能用这种方式,只能使用lora方式
+            # 这里的返回有问题，要去查一下文档
+            # 正常的predict是 32，50，9 ; target 32,50
+            if target is not None:
+                # predict.view(-1, predict.shape[-1]) 32*50,9 
+                # target.view(-1) 32*50
+                return self.loss(predict.view(-1, predict.shape[-1]), target.view(-1))
+            return predict
         if self.config["use_bert"]:
             x = self.bert_encoder(x).last_hidden_state  # [32, 50, 768]
             # x = self.fc1(x)  # bs,50,192
@@ -48,7 +102,7 @@ class TorchModel(nn.Module):
         else:
             x = self.embedding(x)  #input shape:(batch_size, sen_len)
             x, _ = self.layer(x)      #input shape:(batch_size, sen_len, input_dim)
-        predict = self.classify(x)                #input shape:(batch_size, input_dim)
+        predict = self.classify(x) # 32,50,9               #input shape:(batch_size, input_dim)
         if target is not None:
             if self.use_crf:
                 mask = target.gt(-1)

@@ -42,8 +42,13 @@ class DataGenerator:
                 self.sentences.append("".join(sentenece))
                 input_ids = self.encode_sentence(sentenece)
                 # 将文本对应标签进行padding,如果要采用预训练模型还需要在cls位置添加一个-1，
+                # 取消添加[CLS]和[SEP]标记 model.config.add_special_tokens = False
+                
+                # 为什么add_special_tokens=False，不起作用，理论上应该不添加cls和sep的。需要在encoder里面加
+                
+                # 取消cls和sep后就不需要改变label的位置
                 if self.config["use_bert"]:
-                    labels = [-1] + labels  # 在cls位置添加一个-1,sep是不是也要加一个-1,不需要，sep在后面会自动补上-1
+                    labels = [8] + labels  # 在cls位置添加一个-1,sep是不是也要加一个-1,不需要，sep在后面会自动补上-1
                 labels = self.padding(labels, -1)
                 self.data.append([torch.LongTensor(input_ids), torch.LongTensor(labels)])
         return
@@ -58,6 +63,7 @@ class DataGenerator:
                                             truncation='longest_first',
                                             max_length=self.max_length,
                                             padding='max_length',
+                                            # add_special_tokens=False
                                             )
         else:
             for char in text:
